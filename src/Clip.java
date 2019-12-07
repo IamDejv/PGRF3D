@@ -1,3 +1,5 @@
+/*
+
 import transforms.Point2D;
 import transforms.Point3D;
 
@@ -16,7 +18,7 @@ public class Clip {
      * @param r
      * @return
      */
-    public List<Point3D> clipPolygon(List<Point3D> points, Raster r){
+ /*   public List<Point3D> clipPolygon(List<Point3D> points, Raster r){
         clipPolygon.add(new Point3D(0,0,0));
         clipPolygon.add(new Point3D(0,r.getHeight(),0));
         clipPolygon.add(new Point3D(r.getWidth(),r.getHeight(),0));
@@ -62,7 +64,7 @@ public class Clip {
      * @param l2
      * @return
      */
-    private Point3D getIntersection(Edge l1, Edge l2) {
+ /*   private Point3D getIntersection(Edge l1, Edge l2) {
         double a1 = l1.getB().getY()- l1.getA().getY();
         double b1 = l1.getA().getX() - l1.getB().getX();
         double c1 = a1 * l1.getA().getX() + b1 * l1.getA().getY();
@@ -75,3 +77,4 @@ public class Clip {
         return new Point3D(((b2 * c1 - b1 * c2) / delta),  ((a1 * c2 - a2 * c1) / delta),0);
     }
 }
+*/

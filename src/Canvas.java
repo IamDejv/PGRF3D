@@ -32,19 +32,23 @@ public class Canvas {
     private JRadioButton rbTetra;
     private JRadioButton rbCube;
     private ButtonGroup btnGroupRotate;
-    private JCheckBox move;
-    private Cubic fer;
-    private Cubic bez;
-    private Curves curve;
+    private JCheckBox cbMove;
+    private JCheckBox cbFer;
+    private JCheckBox cbBez;
+    private JCheckBox cbCon;
+    private Curves fer;
+    private Curves bez;
+    private Curves con;
     private Mat4 proj = new Mat4OrthoRH(6,6,0.001,100);
     private Mat4 persp = new Mat4PerspRH(Math.PI/3,3/4.0,0.1,25);
     private Mat4 projectionView = persp;
     private Camera cam = new Camera(new Vec3D(-7,0,0),0,0,1,false);
-    private int zoom;
+    private boolean curveInitialized = false;
     private int mouseButton;
     private Solid moving;
     private int mode;
     private Point2D startMove;
+    private Point2D endMove;
     private Solid rotating;
 
     public Canvas(int width, int height) {
@@ -63,21 +67,36 @@ public class Canvas {
         projection = new JRadioButton("Projection");
         rbCube = new JRadioButton("Cube", true);
         rbTetra = new JRadioButton("Tetrahedron");
+        cbMove = new JCheckBox("Move");
+        cbFer = new JCheckBox("Ferguson");
+        cbBez = new JCheckBox("Bezier");
+        cbCon = new JCheckBox("Coon");
+
+
+        perspective.setFocusable(false);
+        projection.setFocusable(false);
+        rbCube.setFocusable(false);
+        rbTetra.setFocusable(false);
+        cbMove.setFocusable(false);
+        cbFer.setFocusable(false);
+        cbBez.setFocusable(false);
+        cbCon.setFocusable(false);
+        cbFer.addActionListener(e->draw());
+        cbBez.addActionListener(e->draw());
+        cbCon.addActionListener(e->draw());
         rbCube.addActionListener(e->{
             if(rbCube.isSelected()){
                 rotating = cube;
+                moving = cube;
             }
         });
         rbTetra.addActionListener(e->{
             if(rbTetra.isSelected()){
                 rotating = tetrahedron;
+                moving = tetrahedron;
             }
         });
-        move = new JCheckBox("Move");
-        move.addActionListener(e->{
-            moving = cube;
-            mode = 1;
-        });
+        cbMove.addActionListener(e-> mode = 1);
         perspective.addActionListener(e->{
             if(perspective.isSelected()){
                 projectionView = persp;
@@ -120,7 +139,10 @@ public class Canvas {
         menu.add(rbTetra);
         menu.add(projection);
         menu.add(perspective);
-        menu.add(move);
+        menu.add(cbMove);
+        menu.add(cbFer);
+        menu.add(cbBez);
+        menu.add(cbCon);
         panel.requestFocus();
         panel.requestFocusInWindow();
         panel.addMouseWheelListener(new MouseWheelListener() {
@@ -164,7 +186,7 @@ public class Canvas {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                if(move.isSelected()){
+                if(cbMove.isSelected()){
                     startMove = new Point2D(e.getX(), e.getY());
                 } else {
                     camera = new Point2D(e.getX(), e.getY());
@@ -177,12 +199,13 @@ public class Canvas {
         panel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if(move.isSelected()){
-                    moving.setTransform(moving.getTransform().add(new Mat4Transl(0.0, (startMove.getX()-e.getX())/10, (-e.getY() + startMove.getY())/10)));
+                if(cbMove.isSelected()){
+                    endMove = new Point2D(e.getX(), e.getY());
+                    double dx = (endMove.getX() - startMove.getX());
+                    double dy = (endMove.getY() - startMove.getY());
+                    moving.setTransform(moving.getTransform().add(new Mat4Transl(0, -dx/30, -dy/30)));
 
                 } else {
-                    System.out.println(mouseButton);
-                    System.out.println(e.getButton());
                     if(mouseButton ==  MouseEvent.BUTTON3){
                         //Rotace objektu
                         cameraEnd = new Point2D(e.getX(), e.getY());
@@ -190,12 +213,11 @@ public class Canvas {
                         double dx = (cameraEnd.getX() - rotation.getX());
                         double dy = (cameraEnd.getY() - rotation.getY());
 
-                        rotating.setTransform(rotating.getTransform().mul(new Mat4RotX(Math.PI / 10000 * dx)));
+                        rotating.setTransform(rotating.getTransform().mul(new Mat4RotZ(Math.PI / 10000 * dx)));
                         rotating.setTransform(rotating.getTransform().mul(new Mat4RotY(-Math.PI / 10000 * dy)));
 
-                        //Mat4Transl translation = new Mat4Transl(0, 0, 0);
-                        //rotating.setTransform(rotating.getTransform().mul(translation.inverse().get()));
-                        //rotating.setTransform(rotating.getTransform().mul(new Mat4RotXYZ(-dx * Math.PI / 5000, dy * Math.PI / 5000, 0)));
+                        //rotating.setTransform(rotating.getTransform().mul(rotating.getTransform().inverse().get()));
+                        //rotating.setTransform(rotating.getTransform().mul(new Mat4RotXYZ(dx * Math.PI / 5000, dy * Math.PI / 5000, 0)));
                         //rotating.setTransform(rotating.getTransform().mul(translation));
 
 
@@ -222,6 +244,8 @@ public class Canvas {
 
             }
         });
+        panel.requestFocus();
+        panel.requestFocusInWindow();
     }
 
     public void clear() {
@@ -235,8 +259,16 @@ public class Canvas {
         graphics.drawImage(img, 0, 0, null);
     }
 
-    private void initCurve(){
-        curve = new Curves(2);
+    private void initCurve() {
+        if(!curveInitialized){
+            fer = new Curves(1);
+            bez = new Curves(2);
+            con = new Curves(3);
+            fer.addCurve(10);
+            bez.addCurve(10);
+            con.addCurve(10);
+            curveInitialized = true;
+        }
     }
 
     private void draw() {
@@ -248,7 +280,15 @@ public class Canvas {
         renderer.draw(tetrahedron);
         initCurve();
         renderer.draw(axis);
-        renderer.draw(curve);
+        if(cbCon.isSelected()){
+            renderer.draw(con);
+        }
+        if(cbFer.isSelected()){
+            renderer.draw(fer);
+        }
+        if(cbBez.isSelected()){
+            renderer.draw(bez);
+        }
         //renderer.draw(circle);
         //renderer.draw(grid);
 
@@ -263,6 +303,7 @@ public class Canvas {
         circle = new Circle(0,0,0.5,25);
         grid = new Grid(5,4);
         rotating = cube;
+        moving = cube;
         draw();
         panel.repaint();
     }

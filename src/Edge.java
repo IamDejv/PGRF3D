@@ -1,5 +1,6 @@
 import transforms.Point2D;
 import transforms.Point3D;
+import transforms.Vec3D;
 
 public class Edge {
     private final Point2D a;
@@ -24,7 +25,7 @@ public class Edge {
      * @param c
      * @return
      */
-    public boolean inside(Point2D c) {
+    public boolean inside(Vec3D c) {
         return (b.getX() - a.getX())*(b.getY()-c.getY()) - (b.getY() - a.getY())*(b.getX()-c.getX()) >= 0.0D;
     }
 }

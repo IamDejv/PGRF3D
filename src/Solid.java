@@ -13,6 +13,7 @@ public abstract class Solid {
     protected Color color;
     protected List<Color> colorBuffer;
     protected boolean axe = false;
+    protected boolean curve = false;
 
 
     public List<Integer> getIndexBuffer() {
@@ -49,5 +50,9 @@ public abstract class Solid {
 
     public boolean isAxe(){
         return axe;
+    }
+
+    public boolean isCurve() {
+        return curve;
     }
 }
