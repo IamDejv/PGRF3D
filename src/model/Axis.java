@@ -1,3 +1,5 @@
+package model;
+
 import transforms.Mat4Scale;
 import transforms.Point3D;
 
@@ -5,7 +7,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Axis extends Solid{
+public class Axis extends Solid {
     public Axis(){
         axe = true;
         colorBuffer = new ArrayList<>();

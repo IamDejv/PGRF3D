@@ -1,3 +1,7 @@
+package app;
+
+import gui.Canvas;
+
 import javax.swing.*;
 
 public class Main {

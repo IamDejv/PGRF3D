@@ -1,4 +1,7 @@
+package model;
+
 import transforms.Cubic;
+import transforms.Mat4Scale;
 import transforms.Point3D;
 
 import java.awt.*;
@@ -52,6 +55,8 @@ public class Curves extends Solid{
             colorBuffer.add(Color.magenta);
             setPoints(points, con);
         }
+        transform = new Mat4Scale(3);
+
     }
 
     public void addCurve(int n){

@@ -1,3 +1,5 @@
+package model;
+
 import transforms.Mat4;
 import transforms.Mat4RotX;
 import transforms.Mat4RotY;

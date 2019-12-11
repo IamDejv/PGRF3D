@@ -1,3 +1,6 @@
+package render;
+
+import model.Solid;
 import transforms.Mat4;
 
 import java.awt.image.BufferedImage;

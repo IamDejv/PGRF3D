@@ -1,3 +1,9 @@
+package gui;
+
+import model.*;
+import raster.RasterBufferedImage;
+import raster.RastersierLine;
+import render.SolidRenderer;
 import transforms.*;
 
 import java.awt.BorderLayout;
@@ -20,8 +26,6 @@ public class Canvas {
     private Tetrahedron tetrahedron;
     private Cube cube;
     private Axis axis;
-    private Circle circle;
-    private Grid grid;
     private Point2D camera;
     private Point2D cameraEnd;
     private Point2D rotation;
@@ -43,10 +47,8 @@ public class Canvas {
     private Mat4 persp = new Mat4PerspRH(Math.PI/3,3/4.0,0.1,25);
     private Mat4 projectionView = persp;
     private Camera cam = new Camera(new Vec3D(-7,0,0),0,0,1,false);
-    private boolean curveInitialized = false;
     private int mouseButton;
     private Solid moving;
-    private int mode;
     private Point2D startMove;
     private Point2D endMove;
     private Solid rotating;
@@ -96,7 +98,6 @@ public class Canvas {
                 moving = tetrahedron;
             }
         });
-        cbMove.addActionListener(e-> mode = 1);
         perspective.addActionListener(e->{
             if(perspective.isSelected()){
                 projectionView = persp;
@@ -203,7 +204,8 @@ public class Canvas {
                     endMove = new Point2D(e.getX(), e.getY());
                     double dx = (endMove.getX() - startMove.getX());
                     double dy = (endMove.getY() - startMove.getY());
-                    moving.setTransform(moving.getTransform().add(new Mat4Transl(0, -dx/30, -dy/30)));
+                    moving.setTransform(moving.getTransform().add(new Mat4Transl(0, -dx, -dy)));
+                    startMove = endMove;
 
                 } else {
                     if(mouseButton ==  MouseEvent.BUTTON3){
@@ -216,13 +218,7 @@ public class Canvas {
                         rotating.setTransform(rotating.getTransform().mul(new Mat4RotZ(Math.PI / 10000 * dx)));
                         rotating.setTransform(rotating.getTransform().mul(new Mat4RotY(-Math.PI / 10000 * dy)));
 
-                        //rotating.setTransform(rotating.getTransform().mul(rotating.getTransform().inverse().get()));
-                        //rotating.setTransform(rotating.getTransform().mul(new Mat4RotXYZ(dx * Math.PI / 5000, dy * Math.PI / 5000, 0)));
-                        //rotating.setTransform(rotating.getTransform().mul(translation));
-
-
                         double rx = rotation.getX();
-                        //cube.setTransform(cube.getTransform().mul(new Mat4RotY()));
                     } else if(mouseButton == MouseEvent.BUTTON1){
                         //Posun kamery
                         cameraEnd = new Point2D(e.getX(), e.getY());
@@ -237,7 +233,7 @@ public class Canvas {
                         cameraEnd = new Point2D(e.getX(), e.getY());
 
                         double dy = (cameraEnd.getY()-rotation.getY());
-                        cube.setTransform(cube.getTransform().add(new Mat4Scale(dy)));
+                        cube.setTransform(cube.getTransform().add(new Mat4Scale(dy/2)));
                     }
                 }
                 draw();
@@ -259,18 +255,6 @@ public class Canvas {
         graphics.drawImage(img, 0, 0, null);
     }
 
-    private void initCurve() {
-        if(!curveInitialized){
-            fer = new Curves(1);
-            bez = new Curves(2);
-            con = new Curves(3);
-            fer.addCurve(10);
-            bez.addCurve(10);
-            con.addCurve(10);
-            curveInitialized = true;
-        }
-    }
-
     private void draw() {
         clear();
 
@@ -278,7 +262,6 @@ public class Canvas {
         renderer.setView(cam.getViewMatrix());
         renderer.draw(cube);
         renderer.draw(tetrahedron);
-        initCurve();
         renderer.draw(axis);
         if(cbCon.isSelected()){
             renderer.draw(con);
@@ -289,8 +272,6 @@ public class Canvas {
         if(cbBez.isSelected()){
             renderer.draw(bez);
         }
-        //renderer.draw(circle);
-        //renderer.draw(grid);
 
         panel.repaint();
     }
@@ -300,10 +281,14 @@ public class Canvas {
         tetrahedron = new Tetrahedron();
         axis = new Axis();
         cube = new Cube();
-        circle = new Circle(0,0,0.5,25);
-        grid = new Grid(5,4);
         rotating = cube;
         moving = cube;
+        fer = new Curves(1);
+        bez = new Curves(2);
+        con = new Curves(3);
+        fer.addCurve(10);
+        bez.addCurve(10);
+        con.addCurve(10);
         draw();
         panel.repaint();
     }

@@ -1,3 +1,5 @@
+package raster;
+
 import java.awt.*;
 
 public class RastersierLine implements Rasteriser{
